@@ -28,8 +28,7 @@ yum -y install wget
 cd $storageDir
 if [ ! -f $storageDir/$nacosVer* ];then
 	echo "-------下载nacos安装包-------"
-	wget -i -c "https://ghps.cc/https://github.com/alibaba/nacos/releases/download/$verNo/$nacosVer.tar.gz"
-# wget -i -c    https://github.com/alibaba/nacos/releases/download/$verNo/$nacosVer.tar.gz
+	wget -i -c    https://github.com/alibaba/nacos/releases/download/$verNo/$nacosVer.tar.gz
 else
     echo "-------nacos安装包已存在-------"
 fi
