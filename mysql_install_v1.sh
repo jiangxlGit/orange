@@ -110,7 +110,7 @@ echo "-------mysql.sock建立软连接-------"
 ln -s /usr/local/mysql/mysql.sock /tmp/mysql.sock
 
 echo "-------登录mysql,修改密码,配置可远程登录-------"
-mysql -uroot -p"$mysqlPWD" << EOF
+mysql -uroot -p"$localPWD" << EOF
     use mysql;
     ALTER user 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY "Jiang13479@";
     UPDATE user set host='%' WHERE user='root';
