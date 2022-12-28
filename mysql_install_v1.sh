@@ -83,9 +83,9 @@ echo "配置数据库编码"
 echo "[client]" > /etc/my.cnf
 echo "default-character-set=utf8" >> /etc/my.cnf
 echo "port=$mysqlPort" >> /etc/my.cnf
-echo "password=$mysqlPWD" >> /etc/my.cnf
 echo "" >> /etc/my.cnf
 echo "[mysqld]" >> /etc/my.cnf
+echo "port=$mysqlPort" >> /etc/my.cnf
 echo "basedir=$mysqlDir" >> /etc/my.cnf
 echo "datadir=$mysqlDir/data" >> /etc/my.cnf
 echo "default-storage-engine=INNODB" >> /etc/my.cnf
