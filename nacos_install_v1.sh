@@ -45,7 +45,7 @@ fi
 echo "-------登录mysql并执行mysql-schema.sql-------"
 cd $installDir/nacos/conf
 mysql -uroot -p"$mysqlPWD" << EOF
-    create database nacos_config;
+    CREATE DATABASE IF NOT EXISTS nacos_config;
     use nacos_config;
     source mysql-schema.sql;
     quit
