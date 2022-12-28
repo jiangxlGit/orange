@@ -4,8 +4,6 @@ echo "@@@@@ mysql开始安装 @@@@@"
 
 # mysql文件版本
 mysqlVer="mysql-8.0.20-linux-glibc2.12-x86_64"
-# mysql密码
-mysqlPWD="Jiang13479@"
 # mysql端口
 mysqlPort="23307"
 #存放目录
@@ -92,7 +90,6 @@ echo "default-storage-engine=INNODB" >> /etc/my.cnf
 echo "socket=$mysqlDir/mysql.sock" >> /etc/my.cnf
 echo "character-set-server=utf8" >> /etc/my.cnf
 echo "collation-server=utf8_general_ci" >> /etc/my.cnf
-echo "skip-grant-tables" >> /etc/my.cnf
 
 cat /etc/my.cnf
 chmod 664 /etc/my.cnf
@@ -111,8 +108,8 @@ ln -s /usr/local/mysql/mysql.sock /tmp/mysql.sock
 
 echo "-------登录mysql,修改密码,配置可远程登录-------"
 mysql -uroot -p"$localPWD" << EOF
-    use mysql;
     ALTER user 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY "Jiang13479@";
+    use mysql;
     UPDATE user set host='%' WHERE user='root';
     flush privileges;
     quit
