@@ -1,3 +1,6 @@
+#!/bin/bash
+clear;
+
 echo "@@@@@ nacos开始安装 @@@@@"
 
 # mysql文件版本
