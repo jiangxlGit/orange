@@ -112,8 +112,8 @@ ln -s /usr/local/mysql/mysql.sock /tmp/mysql.sock
 echo "-------登录mysql,修改密码,配置可远程登录-------"
 mysql -uroot -p"$mysqlPWD" << EOF
     use mysql;
-    ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY "Jiang13479@";
-    UPDATE USER set host='%' WHERE user='root';
+    ALTER user 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY "Jiang13479@";
+    UPDATE user set host='%' WHERE user='root';
     flush privileges;
     quit
 EOF
