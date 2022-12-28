@@ -92,6 +92,7 @@ echo "default-storage-engine=INNODB" >> /etc/my.cnf
 echo "socket=$mysqlDir/mysql.sock" >> /etc/my.cnf
 echo "character-set-server=utf8" >> /etc/my.cnf
 echo "collation-server=utf8_general_ci" >> /etc/my.cnf
+echo "skip-grant-tables" >> /etc/my.cnf
 
 cat /etc/my.cnf
 chmod 664 /etc/my.cnf
