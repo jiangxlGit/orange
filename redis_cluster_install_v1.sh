@@ -17,7 +17,7 @@ Ramredis=`expr $RamTotal / 4 \* 1000 \* 1000`;
 
 BASE_DIR=/usr/local/redis-cluster
 
-PORTS=`seq 7000 7002`
+PORTS=`seq 7000 7005`
 
 START_UP=$BASE_DIR/startup.sh
 
@@ -80,13 +80,13 @@ function generate_instance_conf() {
   echo "cluster-config-file nodes-$1.conf" >> $1/redis.conf
   echo "requirepass Jiang13479@" >> $1/redis.conf
   echo "masterauth Jiang13479@" >> $1/redis.conf
-  echo "dbfilename 7001dump.rdb" >> $1/redis.conf
+  echo "#dbfilename 7001dump.rdb" >> $1/redis.conf
   echo "logfile $1.log" >> $1/redis.conf
-  echo "appendfilename appendonly-$1.aof" >> $1/redis.conf
+  echo "#appendfilename appendonly-$1.aof" >> $1/redis.conf
   if [ -n "$cluster_address" ]; then 
-    echo "cluster-announce-ip $cluster_address" >> $1/redis.conf
+    echo "#cluster-announce-ip $cluster_address" >> $1/redis.conf
   else 
-    echo "cluster-announce-ip 127.0.0.1" >> $1/redis.conf
+    echo "#cluster-announce-ip 127.0.0.1" >> $1/redis.conf
   fi
   echo "appendonly yes" >> $1/redis.conf
   echo "daemonize yes" >> $1/redis.conf
