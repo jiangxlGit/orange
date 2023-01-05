@@ -16,7 +16,7 @@ systemctl disable redis-cluster.service
 
 # 删除redis集群目录
 if [ -f "/usr/local/redis-cluster" ]; then
-	rm -rf /usr/local/redis-cluster
+	rm -rf /usr/local/redis-cluster/
 fi
 
 echo '================================================================';
