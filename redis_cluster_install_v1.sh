@@ -3,7 +3,7 @@
 clear;
 
 echo '================================================================';
-echo '开始安装redis集群脚本';
+echo '开始安装redis服务';
 echo '================================================================';
 #***************************************************************************************
 echo "设置redis版本"
@@ -17,7 +17,7 @@ Ramredis=`expr $RamTotal / 4 \* 1000 \* 1000`;
 
 BASE_DIR=/usr/local/redis-cluster
 
-PORTS=`seq 7000 7005`
+PORTS=`seq 7000 7002`
 
 START_UP=$BASE_DIR/startup.sh
 
@@ -75,9 +75,14 @@ function generate_instance_conf() {
   echo "bind 0.0.0.0" >> $1/redis.conf
   echo "dir $BASE_DIR/$port/data" >> $1/redis.conf
   echo "maxmemory $Ramredis" >> $1/redis.conf
+  echo "maxmemory-policy allkeys-lru" >> $1/redis.conf
   echo "cluster-enabled yes" >> $1/redis.conf
   echo "cluster-config-file nodes-$1.conf" >> $1/redis.conf
-  echo "cluster-node-timeout 5000" >> $1/redis.conf
+  echo "requirepass Jiang13479@" >> $1/redis.conf
+  echo "masterauth Jiang13479@" >> $1/redis.conf
+  echo "dbfilename 7001dump.rdb" >> $1/redis.conf
+  echo "logfile $1.log" >> $1/redis.conf
+  echo "appendfilename appendonly-$1.aof" >> $1/redis.conf
   if [ -n "$cluster_address" ]; then 
     echo "cluster-announce-ip $cluster_address" >> $1/redis.conf
   else 
@@ -85,6 +90,7 @@ function generate_instance_conf() {
   fi
   echo "appendonly yes" >> $1/redis.conf
   echo "daemonize yes" >> $1/redis.conf
+  echo "protected-mode no" >> $1/redis.conf
 }
 
 
@@ -110,39 +116,7 @@ $START_UP
 sleep 5s
 echo "redis服务准备就绪！"
 
-# 创建redis集群
-echo "配置redis集群..."
-/usr/local/bin/redis-cli --cluster create $servers --cluster-replicas 1
-echo "配置完成!"
-
-# generate redis-cluster service file
-cat << EOT > $BASE_DIR/redis-cluster.service
-[Unit]
-Description=Redis 5.0 Cluster Service
-After=network.target
-
-[Service]
-Type=forking
-ExecStart=/usr/local/redis-cluster/startup.sh
-
-[Install]
-WantedBy=default.target
-EOT
-
-# create service
-echo "创建redis集群服务..."
-ln -s $BASE_DIR/$SERVICE /etc/systemd/system/$SERVICE 
-sudo systemctl daemon-reload && sudo systemctl enable $SERVICE && sudo systemctl start $SERVICE
-
-# Cluster OK
-echo ""
-echo "完成集群创建!"
-echo ""
-echo "测试集群命令: /usr/local/bin/redis-cli -h 127.0.0.1 -p 7000"
-echo ""
-echo "127.0.0.1:7000>cluster nodes"
-
 echo '================================================================';
-echo '完成安装redis集群脚本';
+echo '完成安装redis服务';
 echo '================================================================';
 
