@@ -6,6 +6,8 @@ echo '================================================================';
 echo '开始卸载redis服务';
 echo '================================================================';
 
+BASE_DIR=/usr/local/redis-cluster
+
 # 杀死redis服务器
 ps -ef | grep redis-server | grep cluster | awk '{print $2}' | xargs kill -9 
 
