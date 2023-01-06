@@ -7,7 +7,7 @@ echo '完成安装redis集群脚本';
 echo '================================================================';
 
 echo "配置redis集群..."
-/usr/local/bin/redis-cli --cluster create $1:7000 $1:7001 $1:7002 $2:7000 $2:7001 $2:7002 --cluster-replicas 1 -a Jiang13479@
+/usr/local/bin/redis-cli --cluster create $1:7000 $1:7001 $2:7000 $2:7001 $3:7000 $3:7001 --cluster-replicas 1 -a Jiang13479@
 echo "配置完成!"
 
 # generate redis-cluster service file

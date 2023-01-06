@@ -17,7 +17,7 @@ Ramredis=`expr $RamTotal / 4 \* 1000 \* 1000`;
 
 BASE_DIR=/usr/local/redis-cluster
 
-PORTS=`seq 7000 7002`
+PORTS=`seq $1 $2`
 
 START_UP=$BASE_DIR/startup.sh
 
