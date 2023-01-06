@@ -46,6 +46,7 @@ echo "server.1=zk-master:2188:2888" >> $BASE_DIR/zookeeper/conf/zoo.cfg
 echo "server.2=zk-slave1:2188:2888" >> $BASE_DIR/zookeeper/conf/zoo.cfg
 echo "server.3=zk-slave2:2188:2888" >> $BASE_DIR/zookeeper/conf/zoo.cfg
 echo "dataDir=$BASE_DIR/zookeeper/conf/data" >> $BASE_DIR/zookeeper/conf/zoo.cfg
+echo "quorumListenOnAllIPs=true" >> $BASE_DIR/zookeeper/conf/zoo.cfg
 echo "$1" > $BASE_DIR/zookeeper/conf/data/myid
 
 echo "-------启动zookeeper服务...-------"
