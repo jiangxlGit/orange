@@ -9,10 +9,10 @@ storageDir=/data/soft
 installDir=/usr/local
 #判断目录是否存在，不存在则创建
 if [ ! -d "$storageDir" ]; then
-	mkdir $storageDir
+	mkdir -p $storageDir
 fi
 if [ ! -d "$installDir" ]; then
-	mkdir $installDir
+	mkdir -p $installDir
 fi
 
 #搜索当前环境是否安装有JDK
