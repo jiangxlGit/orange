@@ -31,7 +31,7 @@ fi
 
 if [ ! -d "$BASE_DIR/kafka" ]; then
 	echo "-------解压kafka安装包-------"
-	tar -zxvf $BASE_DIR/$kafkaName.tar.gz
+	tar -zxvf $BASE_DIR/$kafkaName.tgz
     echo "-------重命名kafka文件夹-------"
     mv $kafkaName kafka
 else
@@ -39,48 +39,43 @@ else
 fi
 
 echo "-------配置kafka-------"
-mkdir -p $BASE_DIR/kafka/kafka/data
+mkdir -p $BASE_DIR/kafka/data
 cd $BASE_DIR/kafka/config/
 
-if [[ $4 -eq "1" ]]; then
-	ip=$1
-elif [[ $4 -eq "2" ]]; then
-	ip=$2
-elif [[ $4 -eq "3" ]]; then
-	ip=$3
+cat /dev/null > $BASE_DIR/kafka/config/server.properties
 
-
-echo "log.dirs=$BASE_DIR/kafka/kafka/data" >> $BASE_DIR/kafka/config/zookeeper.properties
-cat << EOF > $BASE_DIR/kafka/config/zookeeper.properties
-# 修改Kafka_node的IP地址为各自node本地地址                                         
-listeners=PLAINTEXT://$ip:9092   
-zookeeper.connect=$1:2181,$2:2181,$3:2181
-# Kafka_node2节点修改为2，3修改为3
-broker.id=$4                   
-num.network.threads=3
-num.io.threads=8
-socket.send.buffer.bytes=102400
-socket.receive.buffer.bytes=102400
-socket.request.max.bytes=104857600
-log.dirs=$BASE_DIR/kafka/kafka/data
-num.partitions=1
-num.recovery.threads.per.data.dir=1
-offsets.topic.replication.factor=1
-transaction.state.log.replication.factor=1
-transaction.state.log.min.isr=1
-log.retention.hours=72
-log.segment.bytes=1073741824
-log.retention.check.interval.ms=300000
-delete.topic.enable=true
-zookeeper.connection.timeout.ms=6000
-group.initial.rebalance.delay.ms=3000
-EOF
+echo "zookeeper.connect=$1:2181,$2:2181,$3:2181" >> $BASE_DIR/kafka/config/server.properties
+echo "broker.id=$4" >> $BASE_DIR/kafka/config/server.properties
+echo "listeners=PLAINTEXT://0.0.0.0:9092" >> $BASE_DIR/kafka/config/server.properties
+echo "advertised.listeners=PLAINTEXT://$5:9092" >> $BASE_DIR/kafka/config/server.properties
+echo "advertised.host.name=$5" >> $BASE_DIR/kafka/config/server.properties
+echo "log.dirs=$BASE_DIR/kafka/data" >> $BASE_DIR/kafka/config/server.properties
+echo "num.network.threads=3" >> $BASE_DIR/kafka/config/server.properties
+echo "num.io.threads=8" >> $BASE_DIR/kafka/config/server.properties
+echo "socket.send.buffer.bytes=102400" >> $BASE_DIR/kafka/config/server.properties
+echo "socket.receive.buffer.bytes=102400" >> $BASE_DIR/kafka/config/server.properties
+echo "socket.request.max.bytes=104857600" >> $BASE_DIR/kafka/config/server.properties
+echo "num.partitions=3" >> $BASE_DIR/kafka/config/server.properties
+echo "num.recovery.threads.per.data.dir=1" >> $BASE_DIR/kafka/config/server.properties
+echo "offsets.topic.replication.factor=1" >> $BASE_DIR/kafka/config/server.properties
+echo "transaction.state.log.replication.factor=1" >> $BASE_DIR/kafka/config/server.properties
+echo "transaction.state.log.min.isr=1" >> $BASE_DIR/kafka/config/server.properties
+echo "log.retention.hours=72" >> $BASE_DIR/kafka/config/server.properties
+echo "log.segment.bytes=1073741824" >> $BASE_DIR/kafka/config/server.properties
+echo "log.retention.check.interval.ms=300000" >> $BASE_DIR/kafka/config/server.properties
+echo "delete.topic.enable=true" >> $BASE_DIR/kafka/config/server.properties
+echo "zookeeper.connection.timeout.ms=6000" >> $BASE_DIR/kafka/config/server.properties
+echo "group.initial.rebalance.delay.ms=3000" >> $BASE_DIR/kafka/config/server.properties
 
 echo "-------启动kafka服务...-------"
 $BASE_DIR/kafka/bin/kafka-server-start.sh -daemon $BASE_DIR/kafka/config/server.properties
 sleep 5s
 
+echo "-------测试kafka服务-------"
+$BASE_DIR/kafka/bin//kafka-topics.sh --topic test --bootstrap-server 127.0.0.1:9092 --partitions 3 --replication-factor 2
+sleep 1s
+$BASE_DIR/kafka/bin//kafka-topics.sh --bootstrap-server 127.0.0.1:9092 --describe
+
 echo '================================================================'
 echo '完成安装kafka服务'
-echo ''
 echo '================================================================'
