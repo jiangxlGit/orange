@@ -1,119 +1,119 @@
 #!/bin/bash
 
-echo "@@@@@ mysql开始安装 @@@@@"
+clear;
 
-# mysql文件版本
-mysqlVer="mysql-8.0.20-linux-glibc2.12-x86_64"
-# mysql端口
-mysqlPort="23307"
-#存放目录
-storageDir=/data/soft
-#安装目录
-installDir=/usr/local
-#binlog存放目录
-binlogDir=/home/data/mysql/binlog
-#判断目录是否存在，不存在则创建
-if [ ! -d "$storageDir" ]; then
-	mkdir $storageDir
-fi
-if [ ! -d "$installDir" ]; then
-	mkdir $installDir
-fi
-if [ ! -d "$binlogDir" ]; then
-	mkdir -p $binlogDir
-fi
+echo '================================================================'
+echo '开始安装mysql集群服务'
+echo '================================================================'
+#***************************************************************************************
 
 
-echo "-------安装wget-------"
-yum -y install wget
-cd $storageDir
-if [ ! -f $storageDir/$mysqlVer* ];then
-	echo "-------下载mysql安装包-------"
-	wget -i -c https://dev.mysql.com/get/Downloads/$mysqlVer.tar.xz
-else
-    echo "-------mysql安装包已存在-------"
-fi
+echo "-------安装galera cluster-------"
+cat > /etc/yum.repos.d/galera.repo <<-END
+[galera]
+name = Galera
+baseurl = http://releases.galeracluster.com/galera-4/centos/7/x86_64/
+gpgkey = http://releases.galeracluster.com/GPG-KEY-galeracluster.com
+gpgcheck = 1
+[mysql-wsrep]
+name = MySQL-wsrep
+baseurl = http://releases.galeracluster.com/mysql-wsrep-8.0/centos/7/x86_64/
+gpgkey = http://releases.galeracluster.com/GPG-KEY-galeracluster.com
+gpgcheck = 1
+END
 
-echo "-------查询是否存在mysql文件夹-------"
-if [ ! -d "$installDir/mysql" ]; then
+yum makecache
+yum -y install gcc gcc-c++ openssl openssl-devel lsof socat perl boost-devel rsync jemalloc libaio libaio-devel net-tools
+yum install -y galera-4 mysql-wsrep-8.0
 
-    echo "-------解压mysql安装包-------"
-	tar -Jxvf $storageDir/$mysqlVer.tar.xz -C $installDir
 
-    echo "-------重命名mysql文件夹-------"
-    cd $installDir
-    mv $mysqlVer mysql
-else
-    echo "-------mysql文件夹已存在-------"
-fi
+echo "-------设置hosts及主机名-------"
+echo "$5 mysql_node$4" >> /etc/hosts
+hostnamectl set-hostname "mysql_node$4"
 
-echo "-------添加PATH变量，可在全局使用mysql-------"
-echo '#mysql' >>/etc/profile
-echo 'export PATH=$PATH:/usr/local/mysql/bin' >>/etc/profile
 
-echo "-------正在刷新环境变量-------"
-source /etc/profile
+echo "-------/etc/my.cnf配置-------"
+cat > /etc/my.cnf <<-END
+# For advice on how to change settings please see
+# http://dev.mysql.com/doc/refman/8.0/en/server-configuration-defaults.html
 
-echo "-------创建data存储文件-------"
-mysqlDir=$installDir/mysql
-cd $mysqlDir
-mkdir data
+[client]
+default-character-set=utf8
+socket=/var/lib/mysql/mysql.sock
 
-echo "-------创建用户和用户组，并赋予权限-------"
-groupadd mysql
-useradd -g mysql mysql
-chown -R mysql.mysql $mysqlDir
+[mysql]
+default-character-set=utf8
+socket=/var/lib/mysql/mysql.sock
 
-echo "-------初始化mysql信息-------"
-cd $mysqlDir
-yum -y install numactl
-log=$mysqlDir/mysql_init.log
-./bin/mysqld --user=mysql --basedir=$mysqlDir --datadir=$mysqlDir/data/ --initialize 2>&1 | tee $log
+[mysqldump]
+socket=/var/lib/mysql/mysql.sock
+max_allowed_packet = 512M
 
-echo "-------添加mysqld服务到系统-------"
-cd $mysqlDir
-cp -a ./support-files/mysql.server /etc/init.d/mysql
-chmod +x /etc/init.d/mysql
-chkconfig --add mysql
+[mysqld_safe]
+# 内存分配算法调优（默认malloc）
+malloc-lib=/usr/lib64/libjemalloc.so.1
 
-echo "-------添加my.cnf-------"
-echo "配置数据库编码"
-echo "[client]" > /etc/my.cnf
-echo "default-character-set=utf8" >> /etc/my.cnf
-echo "port=$mysqlPort" >> /etc/my.cnf
-echo "" >> /etc/my.cnf
-echo "[mysqld]" >> /etc/my.cnf
-echo "port=$mysqlPort" >> /etc/my.cnf
-echo "basedir=$mysqlDir" >> /etc/my.cnf
-echo "datadir=$mysqlDir/data" >> /etc/my.cnf
-echo "default-storage-engine=INNODB" >> /etc/my.cnf
-echo "socket=$mysqlDir/mysql.sock" >> /etc/my.cnf
-echo "character-set-server=utf8" >> /etc/my.cnf
-echo "collation-server=utf8_general_ci" >> /etc/my.cnf
+[mysqladmin]
+socket=/var/lib/mysql/mysql.sock
 
-cat /etc/my.cnf
-chmod 664 /etc/my.cnf
+[mysqld]
+#
+# Remove leading # and set to the amount of RAM for the most important data
+# cache in MySQL. Start at 70% of total RAM for dedicated server, else 10%.
+# innodb_buffer_pool_size = 128M
+#
+# Remove the leading "# " to disable binary logging
+# Binary logging captures changes between backups and is enabled by
+# default. It's default setting is log_bin=binlog
+# disable_log_bin
+#
+# Remove leading # to set options mainly useful for reporting servers.
+# The server defaults are faster for transactions and fast SELECTs.
+# Adjust sizes as needed, experiment to find the optimal values.
+# join_buffer_size = 128M
+# sort_buffer_size = 2M
+# read_rnd_buffer_size = 2M
+#
+# Remove leading # to revert to previous value for default_authentication_plugin,
+# this will increase compatibility with older clients. For background, see:
+# https://dev.mysql.com/doc/refman/8.0/en/server-system-variables.html#sysvar_default_authentication_plugin
+# default-authentication-plugin=mysql_native_password
 
-echo "-------启动mysql服务-------"
-service mysql start
-service mysql status
+datadir=/var/lib/mysql
+socket=/var/lib/mysql/mysql.sock
 
-echo "-------获取mysql初始密码-------"
-str=$(grep "password is generated for root@localhost:" $mysqlDir/mysql_init.log)
-localPWD=${str##*"root@localhost: "}
-echo "-------数据库默认密码:$localPWD-------"
+log-error=/var/log/mysqld.log
+pid-file=/var/run/mysqld/mysqld.pid
 
-echo "-------mysql.sock建立软连接-------"
-ln -s /usr/local/mysql/mysql.sock /tmp/mysql.sock
+log_timestamps=SYSTEM
+lower_case_table_names=1
+default_storage_engine=InnoDB
+innodb_autoinc_lock_mode=2
+innodb_flush_log_at_trx_commit=0
+innodb_buffer_pool_size=128M
+binlog_format=ROW
+wsrep_on=ON
+wsrep_provider=/usr/lib64/galera-4/libgalera_smm.so
+wsrep_provider_options="gcache.size=128M; gcache.page_size=128M"
+wsrep_slave_threads=4
+wsrep_sst_method=rsync
+wsrep_sst_auth=rsync:rsync123
+END
 
-echo "-------登录mysql,修改密码,配置可远程登录-------"
-mysql -uroot -p"$localPWD" << EOF
-    ALTER user 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY "Jiang13479@";
-    use mysql;
-    UPDATE user set host='%' WHERE user='root';
-    flush privileges;
-    quit
-EOF
-echo "-------登录mysql,修改密码,配置可远程登录 完成-------"
+echo "server_id=$4" >> /etc/my.cnf
+echo "wsrep_node_name=\"mysql_node$4\"" >> /etc/my.cnf
+echo "wsrep_cluster_name=\"wsrep_cluster\"" >> /etc/my.cnf
+echo "wsrep_node_address=\"$5\"" >> /etc/my.cnf
+echo "wsrep_cluster_address=\"gcomm://$1,$2,$3\"" >> /etc/my.cnf
 
-echo "@@@@@ mysql完成安装 @@@@@"
+
+echo '初始化节点'
+/usr/bin/mysqld_bootstrap
+systemctl status mysqld
+mysql_pass=`grep 'password is generated' /var/log/mysqld.log |awk '{print $NF}' |awk 'END{print}'` && echo $mysql_pass
+mysqladmin -u root -p${mysql_pass} password 'Jiang13479@'
+
+
+echo '================================================================'
+echo '完成安装mysql集群服务'
+echo '================================================================'
