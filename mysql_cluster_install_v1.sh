@@ -75,17 +75,17 @@ sudo systemctl start mysqld
 echo "-------设置为自动启动-------"
 sudo systemctl enable mysqld
 
-echo "-------安装mysql server-------"
+echo "-------获取默认密码-------"
 mysqlPasswordStr=$(grep "password is generated for root@localhost:" /var/log/mysqld.log)
 mysqlPassword=${mysqlPasswordStr##*"root@localhost: "}
 echo "mysql默认密码：$mysqlPassword"
 
 echo "-------登录mysql,修改密码,配置可远程登录-------"
-mysql -uroot -p"$mysqlPassword" << EOF
+mysql -uroot -p"$mysqlPassword" --connect-expired-password << EOF
     ALTER user 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY "Jiang13479@";
     use mysql;
     UPDATE user set host='%' WHERE user='root';
-    GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
+    GRANT ALL PRIVILEGES ON *.* TO 'root'@'%';
     flush privileges;
     quit
 EOF
