@@ -51,8 +51,8 @@ rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 
 
 echo "-------发送到从服务器-------"
-scp galera-3-25.3.37-1.el7.x86_64.rpm root@$2:$BASE_DIR
-scp mysql-wsrep-*.rpm root@$2:$BASE_DIR
+scp galera-3-25.3.37-1.el7.x86_64.rpm root@$3:$BASE_DIR
+scp mysql-wsrep-*.rpm root@$3:$BASE_DIR
 
 
 rpm -qa | grep mysql-wsrep
@@ -92,7 +92,7 @@ wsrep_node_name=node$1                                  # 该节点的名称
 wsrep_node_address="$2"                                 # 该节点的地址
 wsrep-provider=/usr/lib64/galera-3/libgalera_smm.so     # wsrep提供者，我的是在这个目录下
 wsrep_cluster_name='mysql_cluster'                      # 集群的名字，必须是统一的
-wsrep_cluster_address=gcomm://$3                        # 集群中的其他节点地址 43.139.242.81,43.139.96.249
+wsrep_cluster_address=gcomm://$4                        # 集群中的其他节点地址 43.139.242.81,43.139.96.249
 wsrep_sst_method=rsync                                  # 集群使用rsync同步方式
 wsrep_sst_auth=rsync:123456                             # 集群同步的用户名密码
 EOF
