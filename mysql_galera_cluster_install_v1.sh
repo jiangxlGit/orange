@@ -60,21 +60,13 @@ if [ $? -ne 0 ]
 then
 	echo "-------安装Galera和wsrep-------"
     rpm -ivh --nodeps galera-3-25.3.37-1.el7.x86_64.rpm
-    sleep 2s
 	rpm -ivh --nodeps mysql-wsrep-libs-5.7-5.7.39-25.31.el7.x86_64.rpm
-	sleep 2s
 	rpm -ivh --nodeps mysql-wsrep-devel-5.7-5.7.39-25.31.el7.x86_64.rpm
-	sleep 2s
 	rpm -ivh --nodeps mysql-wsrep-libs-compat-5.7-5.7.39-25.31.el7.x86_64.rpm
-	sleep 2s
 	rpm -ivh --nodeps mysql-wsrep-common-5.7-5.7.39-25.31.el7.x86_64.rpm
-	sleep 2s
 	rpm -ivh --nodeps mysql-wsrep-client-5.7-5.7.39-25.31.el7.x86_64.rpm
-	sleep 2s
 	rpm -ivh --nodeps mysql-wsrep-server-5.7-5.7.39-25.31.el7.x86_64.rpm
-	sleep 2s
 	rpm -ivh --nodeps mysql-wsrep-5.7-5.7.39-25.31.el7.x86_64.rpm
-	sleep 2s
 else
     echo "-------Galera和wsrep已安装-------"
 fi
@@ -124,6 +116,15 @@ EOF
 else
     systemctl start mysqld
 	systemctl status mysqld
+
+	mysql -uroot -p"$mysqlPassword" --connect-expired-password << EOF
+	ALTER user 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY "Jiang13479@";
+    use mysql;
+    UPDATE user set host='%' WHERE user='root';
+    GRANT ALL PRIVILEGES ON *.* TO 'root'@'%';
+    flush privileges;
+    quit
+EOF
 fi
 
 mysql -uroot -p"Jiang13479@" --connect-expired-password << EOF
