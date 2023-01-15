@@ -117,7 +117,7 @@ else
     systemctl start mysqld
 	systemctl status mysqld
 
-	mysql -uroot -p"$mysqlPassword" --connect-expired-password << EOF
+mysql -uroot -p"Jiang13479@" --connect-expired-password << EOF
 	ALTER user 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY "Jiang13479@";
     use mysql;
     UPDATE user set host='%' WHERE user='root';
