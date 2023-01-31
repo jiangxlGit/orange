@@ -23,9 +23,23 @@ if [ ! -d "$binlogDir" ]; then
 	mkdir -p $binlogDir
 fi
 
+echo "-------卸载mariadb-------"
+rpm -qa| grep mariadb
+if [ $? -ne 0 ]
+then
+    echo "-------mariadb已卸载-------"
+else
+    rpm -qa| grep mariadb | xargs rpm -e --nodeps
+    if [ $? -eq 0 ]
+    then
+        echo "-------卸载mariadb成功-------"
+    fi
+fi
 
-echo "-------安装wget-------"
+
+echo "-------安装wget和libaio-------"
 yum -y install wget
+yum -y install libaio
 cd $storageDir
 if [ ! -f $storageDir/$mysqlVer* ];then
 	echo "-------下载mysql安装包-------"
