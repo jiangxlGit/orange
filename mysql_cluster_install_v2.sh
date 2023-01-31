@@ -37,23 +37,24 @@ clone_passwd=Jiang13479@
 ######修改hosts文件######
 cat << EOF >> /etc/hosts
 
-106.14.17.131 jloved001
-43.139.242.81 jloved002
-43.139.96.249 jloved003
+172.16.255.163    jloved001
+10.0.8.10         jloved002   
+10.0.8.6          jloved003
 
 EOF
 #######################
 
 mysql_port=3306                 # 数据库实例对外请求端口
-primary_ip=106.14.17.131        # 每个mgr节点IP
-secondary1_ip=43.139.242.81     # 每个mgr节点IP
-secondary2_ip=43.139.96.249    # 每个mgr节点IP
+
+primary_ip=172.16.255.163        # 每个mgr节点IP
+secondary1_ip=10.0.8.10     # 每个mgr节点IP
+secondary2_ip=10.0.8.6     # 每个mgr节点IP
 
 primary_port=33061        # mgr primary节点通讯端口
-secondary1_port=33062     # mgr secondary1节点通讯端口
-secondary2_port=33063     # mgr secondary2节点通讯端口
+secondary1_port=33061     # mgr secondary1节点通讯端口
+secondary2_port=33061     # mgr secondary2节点通讯端口
 
-local_ip=106.14.17.131    # 每个mgr节点IP不相同
+local_ip=172.16.255.163   # 每个mgr节点IP不相同
 local_port=33061          # 每个mgr节点通讯端口port不相同
 
 ################################以下代码不用修改################################
