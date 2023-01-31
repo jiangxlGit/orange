@@ -14,22 +14,36 @@ installDir=/usr/local
 binlogDir=/home/data/mysql/binlog
 #判断目录是否存在，不存在则创建
 if [ ! -d "$storageDir" ]; then
-	mkdir $storageDir
+    mkdir $storageDir
 fi
 if [ ! -d "$installDir" ]; then
-	mkdir $installDir
+    mkdir $installDir
 fi
 if [ ! -d "$binlogDir" ]; then
-	mkdir -p $binlogDir
+    mkdir -p $binlogDir
+fi
+
+echo "-------卸载mariadb-------"
+rpm -qa| grep mariadb
+if [ $? -ne 0 ]
+then
+    echo "-------mariadb已卸载-------"
+else
+    rpm -qa| grep mariadb | xargs rpm -e --nodeps
+    if [ $? -eq 0 ]
+    then
+        echo "-------卸载mariadb成功-------"
+    fi
 fi
 
 
-echo "-------安装wget-------"
+echo "-------安装wget和libaio-------"
 yum -y install wget
+yum -y install libaio
 cd $storageDir
 if [ ! -f $storageDir/$mysqlVer* ];then
-	echo "-------下载mysql安装包-------"
-	wget -i -c https://dev.mysql.com/get/Downloads/$mysqlVer.tar.xz
+    echo "-------下载mysql安装包-------"
+    wget -i -c https://dev.mysql.com/get/Downloads/$mysqlVer.tar.xz
 else
     echo "-------mysql安装包已存在-------"
 fi
@@ -38,7 +52,7 @@ echo "-------查询是否存在mysql文件夹-------"
 if [ ! -d "$installDir/mysql" ]; then
 
     echo "-------解压mysql安装包-------"
-	tar -Jxvf $storageDir/$mysqlVer.tar.xz -C $installDir
+    tar -Jxvf $storageDir/$mysqlVer.tar.xz -C $installDir
 
     echo "-------重命名mysql文件夹-------"
     cd $installDir
@@ -79,7 +93,7 @@ chkconfig --add mysql
 echo "-------添加my.cnf-------"
 echo "配置数据库编码"
 echo "[client]" > /etc/my.cnf
-echo "default-character-set=utf8" >> /etc/my.cnf
+echo "default-character-set=utf8mb4" >> /etc/my.cnf
 echo "port=$mysqlPort" >> /etc/my.cnf
 echo "" >> /etc/my.cnf
 echo "[mysqld]" >> /etc/my.cnf
@@ -88,8 +102,8 @@ echo "basedir=$mysqlDir" >> /etc/my.cnf
 echo "datadir=$mysqlDir/data" >> /etc/my.cnf
 echo "default-storage-engine=INNODB" >> /etc/my.cnf
 echo "socket=$mysqlDir/mysql.sock" >> /etc/my.cnf
-echo "character-set-server=utf8" >> /etc/my.cnf
-echo "collation-server=utf8_general_ci" >> /etc/my.cnf
+echo "character-set-server=utf8mb4" >> /etc/my.cnf
+echo "collation-server=utf8mb4_general_ci" >> /etc/my.cnf
 
 cat /etc/my.cnf
 chmod 664 /etc/my.cnf
