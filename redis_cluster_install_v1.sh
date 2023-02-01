@@ -38,23 +38,6 @@ if [ ! -f "/usr/local/bin/redis-server" ]; then
   echo ""
 fi
 
-# 卸载redis集群
-function remove_cluster() {
-  # 杀死redis服务器
-  ps -ef | grep redis-server | grep cluster | awk '{print $2}' | xargs kill -9 
-  # 禁用systemd
-  systemctl disable redis-cluster.service
-  # 删除redis集群目录
-  if [ -f $BASE_DIR ]; then
-    rm -rf $BASE_DIR
-  fi
-}
-
-if [ "$1" = "--remove" ]; then
-  remove_cluster  
-  exit 0
-fi
-
 # 用户自定义设置
 echo -n "输入主机的公共地址（默认 127.0.0.1）："
 read cluster_address
@@ -80,17 +63,20 @@ function generate_instance_conf() {
   echo "cluster-config-file nodes-$1.conf" >> $1/redis.conf
   echo "requirepass Jiang13479@" >> $1/redis.conf
   echo "masterauth Jiang13479@" >> $1/redis.conf
-  echo "#dbfilename 7001dump.rdb" >> $1/redis.conf
+  echo "dbfilename 7001dump.rdb" >> $1/redis.conf
   echo "logfile $1.log" >> $1/redis.conf
-  echo "#appendfilename appendonly-$1.aof" >> $1/redis.conf
+  echo "appendfilename appendonly-$1.aof" >> $1/redis.conf
   if [ -n "$cluster_address" ]; then 
-    echo "#cluster-announce-ip $cluster_address" >> $1/redis.conf
+    echo "cluster-announce-ip $cluster_address" >> $1/redis.conf
   else 
-    echo "#cluster-announce-ip 127.0.0.1" >> $1/redis.conf
+    echo "cluster-announce-ip 127.0.0.1" >> $1/redis.conf
   fi
   echo "appendonly yes" >> $1/redis.conf
   echo "daemonize yes" >> $1/redis.conf
   echo "protected-mode no" >> $1/redis.conf
+  echo "cluster-announce-port $1" >> $1/redis.conf
+  echo "cluster-announce-bus-port 1$1" >> $1/redis.conf
+  echo "cluster-node-timeout 20000" >> $1/redis.conf
 }
 
 

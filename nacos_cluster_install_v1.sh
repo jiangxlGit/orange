@@ -63,7 +63,7 @@ echo "db.user=root" >> $installDir/nacos/conf/application.properties
 echo "db.password=$mysqlPWD" >> $installDir/nacos/conf/application.properties
 
 echo "-------修改cluster.conf-------"
-cp $installDir/nacos/conf/cluster.conf.example $installDir/nacos/conf/cluster.conf
+touch $installDir/nacos/conf/cluster.conf
 echo "##配置集群" >> $installDir/nacos/conf/cluster.conf
 echo "106.14.17.131:8848" >> $installDir/nacos/conf/cluster.conf
 echo "43.139.242.81:8848" >> $installDir/nacos/conf/cluster.conf
