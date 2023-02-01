@@ -72,9 +72,9 @@ $BASE_DIR/kafka/bin/kafka-server-start.sh -daemon $BASE_DIR/kafka/config/server.
 sleep 5s
 
 echo "-------测试kafka服务-------"
-$BASE_DIR/kafka/bin//kafka-topics.sh --topic test --bootstrap-server 127.0.0.1:9092 --partitions 3 --replication-factor 2
+$BASE_DIR/kafka/bin/kafka-topics.sh --bootstrap-server 127.0.0.1:9092 --create --topic test --partitions 3 --replication-factor 2
 sleep 1s
-$BASE_DIR/kafka/bin//kafka-topics.sh --bootstrap-server 127.0.0.1:9092 --describe
+$BASE_DIR/kafka/bin/kafka-topics.sh --bootstrap-server 127.0.0.1:9092 --describe
 
 echo '================================================================'
 echo '完成安装kafka服务'
