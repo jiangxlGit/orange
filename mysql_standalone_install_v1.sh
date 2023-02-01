@@ -3,7 +3,7 @@
 echo "@@@@@ mysql开始安装 @@@@@"
 
 # mysql文件版本
-mysqlVer="mysql-8.0.20-linux-glibc2.12-x86_64"
+mysqlVer="mysql-8.0.27-linux-glibc2.12-x86_64"
 # mysql端口
 mysqlPort="23307"
 #存放目录
@@ -56,7 +56,7 @@ yum -y install libaio
 cd $storageDir
 if [ ! -f $storageDir/$mysqlVer* ];then
     echo "-------下载mysql安装包-------"
-    wget -i -c https://dev.mysql.com/get/Downloads/$mysqlVer.tar.xz
+    wget --no-cookies --no-check-certificate -i -c https://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-8.0/$mysqlVer.tar.xz
 else
     echo "-------mysql安装包已存在-------"
 fi
@@ -134,7 +134,7 @@ echo "-------mysql.sock建立软连接-------"
 ln -s /usr/local/mysql/mysql.sock /tmp/mysql.sock
 
 echo "-------登录mysql,修改密码,配置可远程登录-------"
-mysql -uroot -p"$localPWD" << EOF
+mysql -uroot -p"$localPWD" --connect-expired-password << EOF
     ALTER user 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY "Jiang13479@";
     use mysql;
     UPDATE user set host='%' WHERE user='root';
