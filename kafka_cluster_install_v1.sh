@@ -6,7 +6,7 @@ echo '================================================================'
 echo '开始安装kafka服务'
 echo '================================================================'
 #***************************************************************************************
-kafkaVer="3.3.1"
+kafkaVer="3.3.2"
 kafkaName="kafka_2.13-$kafkaVer"
 BASE_DIR=/usr/local/kafka
 
@@ -23,7 +23,7 @@ yum -y install wget
 echo "-------下载kafka安装包-------"
 cd $BASE_DIR
 if [ ! -f $BASE_DIR/$kafkaName* ];then
-	wget --no-check-certificate -i -c https://mirrors.tuna.tsinghua.edu.cn/apache/kafka/$kafkaVer/$kafkaName.tgz
+	wget --no-check-certificate -i -c https://mirrors.ustc.edu.cn/apache/kafka/$kafkaVer/$kafkaName.tgz
 else
     echo "-------kafka安装包已存在-------"
 fi
