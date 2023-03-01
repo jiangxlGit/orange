@@ -20,7 +20,7 @@ sh nginx_standalone_install_v1.sh
 
 # ------ 集群部署脚本 ------
 ## mysql集群部署脚本(需要先下载my_test.cnf文件)
-sh mysql_galera_cluster_install_v1.sh
+sh mysql_galera_cluster_install_v1.sh <本节点hostname> <本节点公网ip> <节点2公网ip> 106.14.17.131,43.139.242.81
 
 ## nacos集群部署脚本(要先安装mysql)
 sh nacos_cluster_install_v1.sh

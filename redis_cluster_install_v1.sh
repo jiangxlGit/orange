@@ -11,7 +11,7 @@ redisVer='redis-7.0.6';
 
 #测算内存，用四分之一内存给redis最大内存使用********************************************
 echo "设置redis内存"
-RamTotal=`free -m | grep 'Mem' | awk '{print $2}'`;
+RamTotal=`free -m | grep 'Swap' | awk '{print $4}'`;
 Ramredis=`expr $RamTotal / 4 \* 1000 \* 1000`;
 #***************************************************************************************
 
