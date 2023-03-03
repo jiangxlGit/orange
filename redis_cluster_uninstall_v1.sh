@@ -15,8 +15,8 @@ ps -ef | grep redis-server | grep cluster | awk '{print $2}' | xargs kill -9
 systemctl disable redis-cluster.service
 
 # 删除redis集群目录
-if [ -f "/usr/local/redis-cluster" ]; then
-sudo rm -rf /usr/local/redis-cluster/
+if [ -d "$BASE_DIR" ]; then
+sudo rm -rf $BASE_DIR
 fi
 
 echo '================================================================';
