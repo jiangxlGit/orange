@@ -42,17 +42,60 @@ echo "-------配置zookeeper-------"
 cd $BASE_DIR/zookeeper/conf/
 cp zoo_sample.cfg zoo.cfg
 mkdir $BASE_DIR/zookeeper/conf/data
-echo "server.1=$1:2188:2888" >> $BASE_DIR/zookeeper/conf/zoo.cfg
-echo "server.2=$2:2188:2888" >> $BASE_DIR/zookeeper/conf/zoo.cfg
-echo "server.3=$3:2188:2888" >> $BASE_DIR/zookeeper/conf/zoo.cfg
-echo "dataDir=$BASE_DIR/zookeeper/conf/data" >> $BASE_DIR/zookeeper/conf/zoo.cfg
-echo "quorumListenOnAllIPs=true" >> $BASE_DIR/zookeeper/conf/zoo.cfg
+cat <<EOF > $BASE_DIR/zookeeper/conf/zoo.cfg
+clientPort=2181
+tickTime=2000
+initLimit=10
+syncLimit=5
+server.1=$1:2188:2888
+server.2=$2:2188:2888
+server.3=$3:2188:2888
+dataDir=$BASE_DIR/zookeeper/conf/data
+quorumListenOnAllIPs=true
+EOF
 echo "$4" > $BASE_DIR/zookeeper/conf/data/myid
 
-echo "-------启动zookeeper服务...-------"
+# generate redis-cluster service file
+cat << EOT > $BASE_DIR/zookeeper/zookeeper-cluster.service
+[Unit]
+Description=Zookeeper service
+After=network.target
+ 
+[Service]
+Type=forking
+Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/jdk1.8.0_141/bin/"
+User=root
+Group=root
+ExecStart=/usr/local/zookeeper/zookeeper/bin/zkServer.sh start
+ExecStop=/usr/local/zookeeper/zookeeper/bin/zkServer.sh stop
+Restart=on-failure
+ 
+[Install]
+WantedBy=multi-user.target
+EOT
+
+# create service
+echo "创建redis服务自启动"
+chmod 777 /etc/rc.d/rc.local
+cat << EOT >> /etc/rc.d/rc.local
 $BASE_DIR/zookeeper/bin/zkServer.sh start
-sleep 5s
+EOT
+ln -s $BASE_DIR/zookeeper/zookeeper-cluster.service /usr/lib/systemd/system/zookeeper-cluster.service
+sudo systemctl daemon-reload && sudo systemctl enable zookeeper-cluster.service && sudo systemctl start zookeeper-cluster.service
+
+echo "-------启动zookeeper服务...-------"
+#$BASE_DIR/zookeeper/bin/zkServer.sh start
+#sleep 5s
 $BASE_DIR/zookeeper/bin/zkServer.sh status
+
+echo ""
+echo "完成集群创建!"
+echo ""
+echo "测试集群命令: /usr/local/zookeeper/zookeeper/bin/zkCli.sh  -server localhost:2181"
+echo ""
+echo "create /test data1"
+echo ""
+echo "ls /"
 
 echo '================================================================'
 echo '完成安装zookeeper服务'
