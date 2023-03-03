@@ -72,6 +72,7 @@ function generate_instance_conf() {
     echo "cluster-announce-ip 127.0.0.1" >> $1/redis.conf
   fi
   echo "appendonly yes" >> $1/redis.conf
+  echo "databases 16" >> $1/redis.conf
   echo "daemonize yes" >> $1/redis.conf
   echo "protected-mode no" >> $1/redis.conf
   echo "cluster-announce-port $1" >> $1/redis.conf
@@ -101,6 +102,32 @@ echo "启动redis服务..."
 $START_UP
 sleep 5s
 echo "redis服务准备就绪！"
+
+BASE_DIR=/usr/local/redis-cluster
+SERVICE=redis-cluster.service
+
+# generate redis-cluster service file
+cat << EOT > $BASE_DIR/redis-cluster.service
+[Unit]
+Description=Redis 7.0 Cluster Service
+After=network.target
+
+[Service]
+Type=forking
+ExecStart=/usr/local/redis-cluster/startup.sh
+
+[Install]
+WantedBy=default.target
+EOT
+
+# create service
+echo "创建redis服务自启动"
+chmod 777 /etc/rc.d/rc.local
+cat << EOT >> /etc/rc.d/rc.local
+/usr/local/redis-cluster/startup.sh
+EOT
+ln -s $BASE_DIR/$SERVICE /usr/lib/systemd/system/$SERVICE 
+sudo systemctl daemon-reload && sudo systemctl enable $SERVICE && sudo systemctl start $SERVICE
 
 echo '================================================================';
 echo '完成安装redis服务';
