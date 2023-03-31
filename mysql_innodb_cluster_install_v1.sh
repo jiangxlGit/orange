@@ -3,7 +3,7 @@
 echo "@@@@@ mysql开始安装 @@@@@"
 
 # mysql版本
-mysqlVer='8.0.30-1.el7.x86_64'
+mysqlVer='8.0.28-1.el7.x86_64'
 # 存放目录
 storageDir=/data/soft
 # 安装目录
@@ -11,10 +11,10 @@ installDir=/usr/local
 
 #判断目录是否存在，不存在则创建
 if [ ! -d "$storageDir" ]; then
-    mkdir $storageDir
+    mkdir -p $storageDir
 fi
 if [ ! -d "$installDir" ]; then
-    mkdir $installDir
+    mkdir -p $installDir
 fi
 
 
