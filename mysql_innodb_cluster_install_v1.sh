@@ -1,7 +1,5 @@
 #!/bin/bash
 
-echo "@@@@@ mysql开始安装 @@@@@"
-
 # mysql版本
 mysqlVer='8.0.28-1.el7.x86_64'
 # 存放目录
@@ -9,71 +7,72 @@ storageDir=/data/soft
 # 安装目录
 installDir=/usr/local
 
-#判断目录是否存在，不存在则创建
-if [ ! -d "$storageDir" ]; then
-    mkdir -p $storageDir
-fi
-if [ ! -d "$installDir" ]; then
-    mkdir -p $installDir
-fi
+## 判断mysql是否安装
+check_results=`rpm -qa | grep "mysql"`
+echo "command(rpm -qa) results are: $check_results"
+if [[ $check_results =~ "mysql" ]] 
+then 
+    echo "mysql已安装！"
+else 
+	echo "@@@@@ mysql开始安装 @@@@@"
+	#判断目录是否存在，不存在则创建
+	if [ ! -d "$storageDir" ]; then
+	    mkdir -p $storageDir
+	fi
+	if [ ! -d "$installDir" ]; then
+	    mkdir -p $installDir
+	fi
+	cd $storageDir
+	if [ ! -f $storageDir/mysql-$mysqlVer* ];then
+	    echo "-------安装包不存在，请下载mysql安装包-------"
+	    echo "-------下载mysql安装包地址：https://cdn.mysql.com//Downloads/MySQL-8.0/mysql-$mysqlVer.rpm-bundle.tar-------"
+	else
+	    echo "-------mysql安装包已存在-------"
+	fi
+
+	cd $installDir
+	echo "-------查询是否存在mysql文件夹-------"
+	if [ ! -d "$installDir/mysql" ]; then
+
+		mkdir -p $installDir/mysql
+	    echo "-------解压mysql安装包-------"
+	    tar -xvf $storageDir/mysql-$mysqlVer.rpm-bundle.tar -C $installDir/mysql
+	else
+	    echo "-------mysql文件夹已存在-------"
+	fi
+
+	cd $installDir/mysql
+	rpm -ivh mysql-community-common-$mysqlVer.rpm  --nodeps --force
+	rpm -ivh mysql-community-libs-$mysqlVer.rpm  --nodeps --force
+	rpm -ivh mysql-community-client-$mysqlVer.rpm  --nodeps --force
+	rpm -ivh mysql-community-server-$mysqlVer.rpm  --nodeps --force
+	rpm -qa | grep -i mysql
+
+	mysqld --initialize
+	chown mysql:mysql /var/lib/mysql -R
+	systemctl start mysqld.service
+	systemctl enable mysqld.service
 
 
-cd $storageDir
-if [ ! -f $storageDir/$mysqlVer* ];then
-    echo "-------安装包不存在，请下载mysql安装包-------"
-    echo "-------下载mysql安装包地址：https://cdn.mysql.com//Downloads/MySQL-8.0/mysql-$mysqlVer.rpm-bundle.tar-------"
-    exit 0
-else
-    echo "-------mysql安装包已存在-------"
-fi
+	echo "-------获取mysql初始密码-------"
+	str=$(grep "password is generated for root@localhost:" /var/log/mysqld.log)
+	localPWD=${str##*"root@localhost: "}
+	echo "-------数据库默认密码:$localPWD-------"
 
-cd $installDir
-echo "-------查询是否存在mysql文件夹-------"
-if [ ! -d "$installDir/mysql" ]; then
-
-    echo "-------解压mysql安装包-------"
-    tar -xvf $storageDir/$mysqlVer.rpm-bundle.tar -C $installDir
-
-    echo "-------重命名mysql文件夹-------"
-    mv $mysqlVer mysql
-else
-    echo "-------mysql文件夹已存在-------"
-fi
-
-cd $installDir/mysql
-rpm -ivh mysql-community-common-$mysqlVer.rpm  --nodeps --force
-rpm -ivh mysql-community-libs-$mysqlVer.rpm  --nodeps --force
-rpm -ivh mysql-community-client-$mysqlVer.rpm  --nodeps --force
-rpm -ivh mysql-community-server-$mysqlVer.rpm  --nodeps --force
-rpm -qa | grep -i mysql
-
-mysqld --initialize
-chown mysql:mysql /var/lib/mysql -R
-systemctl start mysqld.service
-systemctl enable mysqld.service
-
-
-echo "-------获取mysql初始密码-------"
-str=$(grep "password is generated for root@localhost:" $mysqlDir/mysql_init.log)
-localPWD=${str##*"root@localhost: "}
-echo "-------数据库默认密码:$localPWD-------"
-
-echo "-------登录mysql,修改密码,配置可远程登录-------"
+	echo "-------登录mysql,修改密码,配置可远程登录-------"
 mysql -uroot -p"$localPWD" --connect-expired-password << EOF
-	set global validate_password_policy=0;
 	ALTER USER 'root'@'localhost' IDENTIFIED BY '123456' PASSWORD EXPIRE NEVER;
-	set global validate_password_length=1;
 	flush privileges;
 	create user 'root'@'%' identified with mysql_native_password by 'Jiang13479@';
 	grant all privileges on *.* to 'root'@'%' with grant option;
 	flush privileges;
     quit
 EOF
-echo "-------登录mysql,修改密码,配置可远程登录 完成-------"
+	echo "-------登录mysql,修改密码,配置可远程登录 完成-------"
 
 
-echo "-------追加配置到/etc/my.cnf-------"
-cat >> /etc/my.cnf << EOF
+	echo "-------追加配置到/etc/my.cnf-------"
+cat > /etc/my.cnf << EOF
 [mysqld]
 datadir=/var/lib/mysql
 socket=/var/lib/mysql/mysql.sock
@@ -108,12 +107,12 @@ loose_group_replication_ip_whitelist='$1,$2,$3'
 loose-group_replication_bootstrap_group=OFF
 EOF
 
-cat /etc/my.cnf
+	cat /etc/my.cnf
 
-echo "-------重启mysql-------"
-systemctl restart mysqld.service
+	echo "-------重启mysql-------"
+	systemctl restart mysqld.service
 
-echo "-------创建组复制的账号-------"
+	echo "-------创建组复制的账号-------"
 mysql -uroot -p123456 << EOF
 	SET SQL_LOG_BIN=0;
 	CREATE USER mgruser@'%' IDENTIFIED BY '123456';
@@ -131,7 +130,7 @@ mysql -uroot -p123456 << EOF
 	quit
 EOF
 
-echo "@@@@@ mysql完成安装 @@@@@"
-
+	echo "@@@@@ mysql完成安装 @@@@@"
+fi
 
 
