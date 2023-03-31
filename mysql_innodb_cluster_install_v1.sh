@@ -107,28 +107,39 @@ loose_group_replication_ip_whitelist='$1,$2,$3'
 loose-group_replication_bootstrap_group=OFF
 EOF
 
-	cat /etc/my.cnf
+cat /etc/my.cnf
 
-	echo "-------重启mysql-------"
-	systemctl restart mysqld.service
+echo "-------重启mysql-------"
+systemctl restart mysqld.service
 
-	echo "-------创建组复制的账号-------"
+echo "-------创建组复制的账号-------"
+
+if [[ $1 -eq "node1" ]]; then
 mysql -uroot -p123456 << EOF
-	SET SQL_LOG_BIN=0;
-	CREATE USER mgruser@'%' IDENTIFIED BY '123456';
-	GRANT REPLICATION SLAVE ON *.* TO mgruser@'%';
-	FLUSH PRIVILEGES;
-	SET SQL_LOG_BIN=1;
-	CHANGE MASTER TO MASTER_USER='mgruser', MASTER_PASSWORD='123456' FOR CHANNEL 'group_replication_recovery';
-	install PLUGIN group_replication SONAME 'group_replication.so';
-	show plugins;
-	set global group_replication_single_primary_mode=OFF;
-	set global group_replication_enforce_update_everywhere_checks=ON;
-	FLUSH PRIVILEGES;
-	START GROUP_REPLICATION;
-	SELECT * FROM performance_schema.replication_group_members;
-	quit
+reset master;
+stop group_replication;
+set global group_replication_single_primary_mode=OFF;
+set global group_replication_enforce_update_everywhere_checks=ON;
+set global group_replication_recovery_get_public_key=1;
+SET GLOBAL group_replication_bootstrap_group=ON;
+START GROUP_REPLICATION;
+SET GLOBAL group_replication_bootstrap_group=OFF;
+SELECT * FROM performance_schema.replication_group_members;
+quit
 EOF
+else
+mysql -uroot -p123456 << EOF
+reset master;
+stop group_replication;
+set global group_replication_single_primary_mode=OFF;
+set global group_replication_enforce_update_everywhere_checks=ON;
+set global group_replication_recovery_get_public_key=1;
+START GROUP_REPLICATION;
+SELECT * FROM performance_schema.replication_group_members;
+quit
+EOF
+fi
+
 
 	echo "@@@@@ mysql完成安装 @@@@@"
 fi
