@@ -7,7 +7,7 @@ echo '开始安装zookeeper服务'
 echo '================================================================'
 #***************************************************************************************
 zooVer="zookeeper-3.8.0"
-zooName="apache-$zooVer-bin"
+zooName="apache-$zooVer"
 BASE_DIR=/usr/local/zookeeper
 
 
@@ -23,7 +23,7 @@ yum -y install wget
 echo "-------下载zookeeper安装包-------"
 cd $BASE_DIR
 if [ ! -f $BASE_DIR/$zooName* ];then
-	wget --no-check-certificate -i -c https://mirrors.tuna.tsinghua.edu.cn/apache/zookeeper/$zooVer/$zooName.tar.gz
+	wget --no-check-certificate -i -c https://mirrors.tuna.tsinghua.edu.cn/apache/zookeeper/$zooVer/$zooName-bin.tar.gz
 else
     echo "-------zookeeper安装包已存在-------"
 fi
@@ -31,9 +31,9 @@ fi
 
 if [ ! -d "$BASE_DIR/zookeeper" ]; then
 	echo "-------解压zookeeper安装包-------"
-	tar -zxvf $BASE_DIR/$zooName.tar.gz
+	tar -zxvf $BASE_DIR/$zooName-bin.tar.gz
     echo "-------重命名zookeeper文件夹-------"
-    mv $zooName zookeeper
+    mv $zooName-bin zookeeper
 else
     echo "-------zookeeper文件夹已存在-------"
 fi
@@ -49,11 +49,10 @@ initLimit=10
 syncLimit=5
 server.1=$1:2188:2888
 server.2=$2:2188:2888
-server.3=$3:2188:2888
 dataDir=$BASE_DIR/zookeeper/conf/data
 quorumListenOnAllIPs=true
 EOF
-echo "$4" > $BASE_DIR/zookeeper/conf/data/myid
+echo "$3" > $BASE_DIR/zookeeper/conf/data/myid
 
 # generate redis-cluster service file
 cat << EOT > $BASE_DIR/zookeeper/zookeeper-cluster.service
@@ -89,7 +88,7 @@ echo "-------启动zookeeper服务...-------"
 $BASE_DIR/zookeeper/bin/zkServer.sh status
 
 echo ""
-echo "完成集群创建!"
+echo "完成集群创建, 需开放2181,2188,2888端口"
 echo ""
 echo "测试集群命令: /usr/local/zookeeper/zookeeper/bin/zkCli.sh  -server localhost:2181"
 echo ""
